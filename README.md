@@ -12,6 +12,7 @@ It is designed for personal use on a laptop, home server, or small VPS.
   - Indeed
   - Configurable generic job boards
 - Automatic background collection every 30 minutes
+- Location-aware collection using each user's preferred locations
 - Duplicate removal using a stable job fingerprint
 - Deterministic scoring without AI:
   - base relevance: 20
@@ -87,13 +88,20 @@ JOB_RADAR_SCRAPE_ON_STARTUP=false uvicorn app.main:app --reload
 
 The generic scraper reads `JOB_RADAR_GENERIC_SOURCES` as JSON. Each source can define selectors for job cards and fields.
 
+For local sites that expose search URLs, use URL placeholders:
+
+- `{term}` URL-encoded preferred category or keyword
+- `{location}` URL-encoded preferred location
+- `{raw_term}` unencoded preferred category or keyword
+- `{raw_location}` unencoded preferred location
+
 Example:
 
 ```bash
 export JOB_RADAR_GENERIC_SOURCES='[
   {
     "name": "Example Jobs",
-    "url": "https://example.com/jobs",
+    "url": "https://example.com/jobs?q={term}&city={location}",
     "category": "software",
     "limit": 20,
     "selectors": {

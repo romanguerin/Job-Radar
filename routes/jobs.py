@@ -9,6 +9,8 @@ from app.services import (
     get_job_with_score,
     get_users,
     job_filter_values,
+    remove_saved_job,
+    saved_job_status,
     search_jobs,
     set_job_status,
 )
@@ -92,6 +94,7 @@ def job_detail(
             status_code=404,
         )
     job, score = result
+    current_status = saved_job_status(db, user, job.id)
     return templates.TemplateResponse(
         request,
         "job_detail.html",
@@ -102,6 +105,7 @@ def job_detail(
             "users": users,
             "job": job,
             "score": score,
+            "current_status": current_status,
         },
     )
 
@@ -115,4 +119,15 @@ def update_job_status(
 ) -> RedirectResponse:
     user = get_active_user(db, user_id)
     set_job_status(db, user, job_id, status)
+    return RedirectResponse(f"/jobs/{job_id}?user_id={user.id}", status_code=303)
+
+
+@router.post("/jobs/{job_id}/remove-saved")
+def remove_saved_status(
+    job_id: int,
+    user_id: int = Form(...),
+    db: Session = Depends(get_db),
+) -> RedirectResponse:
+    user = get_active_user(db, user_id)
+    remove_saved_job(db, user, job_id)
     return RedirectResponse(f"/jobs/{job_id}?user_id={user.id}", status_code=303)

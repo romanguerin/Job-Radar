@@ -35,6 +35,11 @@
                 <div style="width: {{ score.score }}%"></div>
             </div>
             <p class="text-secondary">{{ score.reasons }}</p>
+            {% if current_status %}
+                <div class="alert alert-secondary py-2">
+                    Current status: <strong class="text-capitalize">{{ current_status }}</strong>
+                </div>
+            {% endif %}
             <div class="vstack gap-2 mt-4">
                 <form method="post" action="/jobs/{{ job.id }}/status">
                     <input type="hidden" name="user_id" value="{{ user.id }}">
@@ -51,6 +56,12 @@
                     <input type="hidden" name="status" value="rejected">
                     <button class="btn btn-outline-danger w-100" type="submit">Mark Rejected</button>
                 </form>
+                {% if current_status %}
+                    <form method="post" action="/jobs/{{ job.id }}/remove-saved">
+                        <input type="hidden" name="user_id" value="{{ user.id }}">
+                        <button class="btn btn-outline-light w-100" type="submit">Remove from saved list</button>
+                    </form>
+                {% endif %}
             </div>
         </div>
     </div>

@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends, Request
-from fastapi.responses import HTMLResponse
+from fastapi import APIRouter, Depends, Form, Request
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
-from app.services import get_active_user, get_users, saved_jobs
+from app.services import get_active_user, get_users, remove_saved_job, saved_jobs
 from database.session import get_db
 
 
@@ -33,3 +33,16 @@ def saved_jobs_page(
             "status": status or "all",
         },
     )
+
+
+@router.post("/saved/{job_id}/remove")
+def remove_saved_offer(
+    job_id: int,
+    user_id: int = Form(...),
+    status: str = Form("all"),
+    db: Session = Depends(get_db),
+) -> RedirectResponse:
+    user = get_active_user(db, user_id)
+    remove_saved_job(db, user, job_id)
+    suffix = "" if status == "all" else f"&status={status}"
+    return RedirectResponse(f"/saved?user_id={user.id}{suffix}", status_code=303)

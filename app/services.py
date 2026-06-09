@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.scoring import calculate_match_score, normalize_csv, split_preferences
 from models.entities import Job, JobScore, SavedJob, User
-from scrapers.base import ScrapedJob
+from scrapers.base import ScrapedJob, SearchQuery
 from scrapers.registry import get_scrapers
 
 
@@ -54,6 +54,36 @@ def update_user_preferences(
     user.minimum_salary = max(0, minimum_salary)
     db.commit()
     recalculate_scores(db)
+
+
+def search_queries_for_users(users: Iterable[User]) -> list[SearchQuery]:
+    terms: list[str] = []
+    locations: list[str] = []
+    for user in users:
+        terms.extend(split_preferences(user.categories))
+        terms.extend(split_preferences(user.keywords))
+        locations.extend(split_preferences(user.locations))
+
+    def unique(values: list[str]) -> list[str]:
+        seen: set[str] = set()
+        result: list[str] = []
+        for value in values:
+            key = value.lower()
+            if key not in seen:
+                seen.add(key)
+                result.append(value)
+        return result
+
+    unique_terms = unique(terms)[:8] or ["python", "marketing"]
+    unique_locations = unique(locations)[:8] or [""]
+
+    queries: list[SearchQuery] = []
+    for term in unique_terms:
+        for location in unique_locations:
+            queries.append(SearchQuery(term=term, location=location))
+            if len(queries) >= 18:
+                return queries
+    return queries
 
 
 def search_terms_for_users(users: Iterable[User]) -> list[str]:
@@ -126,14 +156,14 @@ def recalculate_scores(db: Session) -> None:
 
 async def collect_jobs(db: Session) -> dict[str, int]:
     users = get_users(db)
-    search_terms = search_terms_for_users(users)
+    search_queries = search_queries_for_users(users)
     added = 0
     seen = 0
     errors = 0
 
     for scraper in get_scrapers():
         try:
-            scraped_jobs = await scraper.fetch_jobs(search_terms)
+            scraped_jobs = await scraper.fetch_jobs(search_queries)
         except Exception:
             errors += 1
             continue
@@ -148,7 +178,7 @@ async def collect_jobs(db: Session) -> dict[str, int]:
                 upsert_score(db, job, user)
         db.commit()
 
-    return {"seen": seen, "added": added, "errors": errors}
+    return {"seen": seen, "added": added, "errors": errors, "queries": len(search_queries)}
 
 
 def dashboard_stats(db: Session, user: User) -> dict[str, object]:
@@ -221,6 +251,13 @@ def get_job_with_score(db: Session, job_id: int, user: User) -> tuple[Job, JobSc
     ).first()
 
 
+def saved_job_status(db: Session, user: User, job_id: int) -> str | None:
+    saved = db.scalar(
+        select(SavedJob).where(and_(SavedJob.user_id == user.id, SavedJob.job_id == job_id))
+    )
+    return saved.status if saved else None
+
+
 def set_job_status(db: Session, user: User, job_id: int, status: str) -> None:
     if status not in {"saved", "applied", "rejected"}:
         return
@@ -232,6 +269,16 @@ def set_job_status(db: Session, user: User, job_id: int, status: str) -> None:
         db.add(saved)
     saved.status = status
     saved.updated_at = datetime.utcnow()
+    db.commit()
+
+
+def remove_saved_job(db: Session, user: User, job_id: int) -> None:
+    saved = db.scalar(
+        select(SavedJob).where(and_(SavedJob.user_id == user.id, SavedJob.job_id == job_id))
+    )
+    if saved is None:
+        return
+    db.delete(saved)
     db.commit()
 
 

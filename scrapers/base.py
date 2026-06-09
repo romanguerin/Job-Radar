@@ -15,9 +15,21 @@ class ScrapedJob:
     url: str
 
 
+@dataclass(frozen=True)
+class SearchQuery:
+    term: str
+    location: str = ""
+
+    @property
+    def label(self) -> str:
+        if self.location:
+            return f"{self.term} in {self.location}"
+        return self.term
+
+
 class JobScraper(ABC):
     source_name: str
 
     @abstractmethod
-    async def fetch_jobs(self, search_terms: list[str]) -> list[ScrapedJob]:
+    async def fetch_jobs(self, search_queries: list[SearchQuery]) -> list[ScrapedJob]:
         """Fetch jobs from a source and return normalized job records."""
