@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Saved Jobs - Job Radar{% endblock %}
+
+{% block content %}
+<div class="panel">
+    <div class="d-flex flex-column flex-md-row justify-content-between gap-3 mb-4">
+        <div>
+            <p class="text-uppercase text-info small fw-semibold mb-1">Pipeline</p>
+            <h1 class="h2 mb-0">Saved, applied, and rejected jobs</h1>
+        </div>
+        <div class="btn-group align-self-start">
+            <a class="btn btn-sm {% if status == 'all' %}btn-info{% else %}btn-outline-light{% endif %}" href="/saved?user_id={{ user.id }}">All</a>
+            <a class="btn btn-sm {% if status == 'saved' %}btn-info{% else %}btn-outline-light{% endif %}" href="/saved?user_id={{ user.id }}&status=saved">Saved</a>
+            <a class="btn btn-sm {% if status == 'applied' %}btn-info{% else %}btn-outline-light{% endif %}" href="/saved?user_id={{ user.id }}&status=applied">Applied</a>
+            <a class="btn btn-sm {% if status == 'rejected' %}btn-info{% else %}btn-outline-light{% endif %}" href="/saved?user_id={{ user.id }}&status=rejected">Rejected</a>
+        </div>
+    </div>
+
+    {% if rows %}
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                <tr>
+                    <th>Job</th>
+                    <th>Status</th>
+                    <th>Source</th>
+                    <th>Score</th>
+                    <th>Updated</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for saved, job, score in rows %}
+                    <tr>
+                        <td>
+                            <a href="/jobs/{{ job.id }}?user_id={{ user.id }}" class="fw-semibold">{{ job.title }}</a>
+                            <div class="text-secondary small">{{ job.company }} · {{ job.location }}</div>
+                        </td>
+                        <td><span class="badge text-bg-secondary text-capitalize">{{ saved.status }}</span></td>
+                        <td>{{ job.source }}</td>
+                        <td><span class="score-pill">{{ score.score }}</span></td>
+                        <td>{{ saved.updated_at.strftime("%Y-%m-%d") }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">No jobs in this list yet.</div>
+    {% endif %}
+</div>
+{% endblock %}

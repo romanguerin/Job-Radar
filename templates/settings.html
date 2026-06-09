@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Settings - Job Radar{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-xl-8">
+        <div class="panel">
+            <p class="text-uppercase text-info small fw-semibold mb-1">Preferences</p>
+            <h1 class="h2 mb-4">Settings for {{ user.name }}</h1>
+
+            <form method="post" action="/settings" class="row g-3">
+                <input type="hidden" name="user_id" value="{{ user.id }}">
+                <div class="col-md-6">
+                    <label class="form-label" for="name">Name</label>
+                    <input class="form-control" id="name" name="name" value="{{ user.name }}" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="minimum_salary">Minimum salary</label>
+                    <input class="form-control" type="number" min="0" id="minimum_salary" name="minimum_salary" value="{{ user.minimum_salary }}">
+                </div>
+                <div class="col-12">
+                    <label class="form-label" for="categories">Preferred job categories</label>
+                    <input class="form-control" id="categories" name="categories" value="{{ user.categories }}" placeholder="software, data, product">
+                    <div class="form-text">Comma-separated categories used for collection and scoring.</div>
+                </div>
+                <div class="col-12">
+                    <label class="form-label" for="locations">Preferred locations</label>
+                    <input class="form-control" id="locations" name="locations" value="{{ user.locations }}" placeholder="Paris, Remote, Lyon">
+                </div>
+                <div class="col-12">
+                    <label class="form-label" for="keywords">Preferred keywords</label>
+                    <textarea class="form-control" id="keywords" name="keywords" rows="3" placeholder="python, fastapi, backend">{{ user.keywords }}</textarea>
+                </div>
+                <div class="col-12">
+                    <label class="form-label" for="excluded_keywords">Excluded keywords</label>
+                    <textarea class="form-control" id="excluded_keywords" name="excluded_keywords" rows="3" placeholder="internship, unpaid, stage">{{ user.excluded_keywords }}</textarea>
+                </div>
+                <div class="col-12 d-flex gap-2">
+                    <button class="btn btn-info" type="submit">Save settings</button>
+                    <a class="btn btn-outline-light" href="/?user_id={{ user.id }}">Back to dashboard</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
