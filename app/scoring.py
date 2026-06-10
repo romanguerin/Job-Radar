@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+from app.locations import location_matches
 from models.entities import Job, User
 
 
@@ -46,7 +47,15 @@ def calculate_match_score(job: Job, user: User) -> ScoreResult:
         score += 20
         reasons.append("Category match")
 
-    if locations and _contains_any(job.location or "", locations):
+    location_text = " ".join(
+        [
+            job.location or "",
+            job.title or "",
+            job.description or "",
+            job.contract_type or "",
+        ]
+    )
+    if locations and location_matches(location_text, locations):
         score += 20
         reasons.append("Location match")
 

@@ -13,6 +13,7 @@ It is designed for personal use on a laptop, home server, or small VPS.
   - Configurable generic job boards
 - Automatic background collection every 30 minutes
 - Location-aware collection using each user's preferred locations
+- Explicit Remote option in settings, with remote-specific source searches
 - Duplicate removal using a stable job fingerprint
 - Deterministic scoring without AI:
   - base relevance: 20
@@ -94,6 +95,8 @@ For local sites that expose search URLs, use URL placeholders:
 - `{location}` URL-encoded preferred location
 - `{raw_term}` unencoded preferred category or keyword
 - `{raw_location}` unencoded preferred location
+- `{remote}` URL-encoded `Remote` when the query is remote, otherwise blank
+- `{is_remote}` `1` for remote queries, otherwise `0`
 
 Example:
 

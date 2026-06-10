@@ -5,6 +5,7 @@ from urllib.parse import quote_plus
 from playwright.async_api import async_playwright
 
 from app.config import get_settings
+from app.locations import REMOTE_LABEL
 from scrapers.base import JobScraper, ScrapedJob, SearchQuery
 from scrapers.utils import absolute_url, parse_salary, safe_attr, safe_text
 
@@ -23,7 +24,8 @@ class GenericScraper(JobScraper):
 
     def _source_urls(self, source: dict[str, Any], search_queries: list[SearchQuery]) -> list[tuple[str, SearchQuery | None]]:
         url = str(source["url"])
-        if "{term}" not in url and "{location}" not in url and "{raw_term}" not in url and "{raw_location}" not in url:
+        placeholders = ("{term}", "{location}", "{raw_term}", "{raw_location}", "{remote}", "{is_remote}")
+        if not any(placeholder in url for placeholder in placeholders):
             return [(url, None)]
 
         queries = search_queries or [SearchQuery("")]
@@ -36,6 +38,8 @@ class GenericScraper(JobScraper):
                         location=quote_plus(query.location),
                         raw_term=query.term,
                         raw_location=query.location,
+                        remote=quote_plus(REMOTE_LABEL if query.is_remote else ""),
+                        is_remote="1" if query.is_remote else "0",
                     ),
                     query,
                 )

@@ -26,6 +26,14 @@
                 <div class="col-12">
                     <label class="form-label" for="locations">Preferred locations</label>
                     <input class="form-control" id="locations" name="locations" value="{{ user.locations }}" placeholder="Paris, Remote, Lyon">
+                    <div class="form-text">Use city names such as Paris or Lyon. Remote can also be enabled below.</div>
+                </div>
+                <div class="col-12">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="include_remote" name="include_remote" value="true" {% if include_remote %}checked{% endif %}>
+                        <label class="form-check-label" for="include_remote">Include remote jobs</label>
+                    </div>
+                    <div class="form-text">When enabled, Job Radar searches remote offers and matches terms such as Remote, télétravail, à distance, and work from home.</div>
                 </div>
                 <div class="col-12">
                     <label class="form-label" for="keywords">Preferred keywords</label>

@@ -5,6 +5,13 @@ from typing import Iterable
 from sqlalchemy import Select, and_, func, or_, select
 from sqlalchemy.orm import Session
 
+from app.locations import (
+    REMOTE_LABEL,
+    REMOTE_SYNONYMS,
+    is_remote_location,
+    normalize_locations,
+    normalize_locations_csv,
+)
 from app.scoring import calculate_match_score, normalize_csv, split_preferences
 from models.entities import Job, JobScore, SavedJob, User
 from scrapers.base import ScrapedJob, SearchQuery
@@ -48,7 +55,7 @@ def update_user_preferences(
 ) -> None:
     user.name = name.strip() or user.name
     user.categories = normalize_csv(categories)
-    user.locations = normalize_csv(locations)
+    user.locations = normalize_locations_csv(locations)
     user.keywords = normalize_csv(keywords)
     user.excluded_keywords = normalize_csv(excluded_keywords)
     user.minimum_salary = max(0, minimum_salary)
@@ -68,6 +75,9 @@ def search_queries_for_users(users: Iterable[User]) -> list[SearchQuery]:
         seen: set[str] = set()
         result: list[str] = []
         for value in values:
+            value = value.strip()
+            if not value:
+                continue
             key = value.lower()
             if key not in seen:
                 seen.add(key)
@@ -75,7 +85,7 @@ def search_queries_for_users(users: Iterable[User]) -> list[SearchQuery]:
         return result
 
     unique_terms = unique(terms)[:8] or ["python", "marketing"]
-    unique_locations = unique(locations)[:8] or [""]
+    unique_locations = normalize_locations(unique(locations))[:8] or [""]
 
     queries: list[SearchQuery] = []
     for term in unique_terms:
@@ -223,7 +233,22 @@ def filtered_jobs_query(
     if category:
         query = query.where(Job.category.ilike(f"%{category}%"))
     if location:
-        query = query.where(Job.location.ilike(f"%{location}%"))
+        if is_remote_location(location):
+            remote_clauses = []
+            for synonym in sorted(REMOTE_SYNONYMS | {REMOTE_LABEL.lower()}):
+                pattern = f"%{synonym}%"
+                remote_clauses.extend(
+                    [
+                        Job.location.ilike(pattern),
+                        Job.title.ilike(pattern),
+                        Job.description.ilike(pattern),
+                        Job.contract_type.ilike(pattern),
+                    ]
+                )
+            query = query.where(or_(*remote_clauses))
+        else:
+            pattern = f"%{location}%"
+            query = query.where(or_(Job.location.ilike(pattern), Job.description.ilike(pattern)))
     if source:
         query = query.where(Job.source == source)
     if min_score is not None:
@@ -239,6 +264,8 @@ def filtered_jobs_query(
 def job_filter_values(db: Session) -> dict[str, list[str]]:
     categories = list(db.scalars(select(Job.category).where(Job.category != "").distinct().order_by(Job.category)))
     locations = list(db.scalars(select(Job.location).where(Job.location != "").distinct().order_by(Job.location)))
+    if not any(is_remote_location(location) for location in locations):
+        locations.insert(0, REMOTE_LABEL)
     sources = list(db.scalars(select(Job.source).distinct().order_by(Job.source)))
     return {"categories": categories, "locations": locations, "sources": sources}
 

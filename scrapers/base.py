@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
+from app.locations import REMOTE_LABEL, is_remote_location
+
 
 @dataclass(frozen=True)
 class ScrapedJob:
@@ -19,6 +21,16 @@ class ScrapedJob:
 class SearchQuery:
     term: str
     location: str = ""
+
+    @property
+    def is_remote(self) -> bool:
+        return is_remote_location(self.location)
+
+    @property
+    def source_location(self) -> str:
+        if self.is_remote:
+            return REMOTE_LABEL
+        return self.location
 
     @property
     def label(self) -> str:

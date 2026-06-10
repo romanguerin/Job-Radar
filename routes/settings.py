@@ -3,6 +3,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
+from app.locations import ensure_remote_location, has_remote_location, remove_remote_location
 from app.services import get_active_user, get_users, update_user_preferences
 from database.session import get_db
 
@@ -27,6 +28,7 @@ def settings_page(
             "active_page": "settings",
             "user": user,
             "users": users,
+            "include_remote": has_remote_location(user.locations),
         },
     )
 
@@ -40,9 +42,11 @@ def update_settings(
     keywords: str = Form(""),
     excluded_keywords: str = Form(""),
     minimum_salary: int = Form(0),
+    include_remote: bool = Form(False),
     db: Session = Depends(get_db),
 ) -> RedirectResponse:
     user = get_active_user(db, user_id)
+    locations = ensure_remote_location(locations) if include_remote else remove_remote_location(locations)
     update_user_preferences(
         db=db,
         user=user,
