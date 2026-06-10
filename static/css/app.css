@@ -1,0 +1,176 @@
+:root {
+    --app-bg: #08111f;
+    --app-panel: rgba(17, 28, 48, 0.92);
+    --app-panel-border: rgba(148, 163, 184, 0.16);
+    --app-accent: #38bdf8;
+    --app-muted: #94a3b8;
+}
+
+body {
+    background:
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 28rem),
+        radial-gradient(circle at top right, rgba(99, 102, 241, 0.18), transparent 28rem),
+        var(--app-bg);
+    color: #e2e8f0;
+    min-height: 100vh;
+}
+
+a {
+    color: #7dd3fc;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #bae6fd;
+}
+
+.app-navbar {
+    background: rgba(2, 6, 23, 0.9);
+    border-bottom: 1px solid var(--app-panel-border);
+    backdrop-filter: blur(14px);
+}
+
+.user-select {
+    min-width: 10rem;
+}
+
+.hero-card,
+.panel,
+.metric-card,
+.job-card {
+    background: var(--app-panel);
+    border: 1px solid var(--app-panel-border);
+    border-radius: 1.25rem;
+    box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.25);
+}
+
+.panel {
+    padding: 1.5rem;
+}
+
+.panel-header {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.panel-header h2 {
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+.metric-card {
+    min-height: 8.5rem;
+    padding: 1.4rem;
+}
+
+.metric-card span {
+    color: var(--app-muted);
+    display: block;
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+}
+
+.metric-card strong {
+    display: block;
+    font-size: clamp(1.35rem, 3vw, 2.15rem);
+    line-height: 1.1;
+}
+
+.job-card {
+    padding: 1.25rem;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.job-card:hover {
+    border-color: rgba(56, 189, 248, 0.5);
+    transform: translateY(-2px);
+}
+
+.job-title {
+    color: #f8fafc;
+    font-size: 1.08rem;
+    font-weight: 700;
+}
+
+.job-description {
+    color: #cbd5e1;
+    display: -webkit-box;
+    margin: 0.9rem 0;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.job-detail-description {
+    color: #dbeafe;
+    line-height: 1.75;
+    white-space: pre-line;
+}
+
+.score-pill {
+    align-items: center;
+    background: linear-gradient(135deg, #0ea5e9, #22c55e);
+    border-radius: 999px;
+    color: #02111f;
+    display: inline-flex;
+    font-weight: 800;
+    height: 2.35rem;
+    justify-content: center;
+    min-width: 2.35rem;
+    padding: 0 0.7rem;
+}
+
+.score-pill-lg {
+    font-size: 1.2rem;
+    height: 3.25rem;
+    min-width: 3.25rem;
+}
+
+.score-meter {
+    background: rgba(148, 163, 184, 0.2);
+    border-radius: 999px;
+    height: 0.8rem;
+    overflow: hidden;
+}
+
+.score-meter div {
+    background: linear-gradient(90deg, #38bdf8, #22c55e);
+    height: 100%;
+}
+
+.recent-list .list-group-item,
+.table {
+    --bs-list-group-bg: transparent;
+    --bs-list-group-border-color: rgba(148, 163, 184, 0.14);
+}
+
+.empty-state {
+    color: var(--app-muted);
+    padding: 2.5rem;
+    text-align: center;
+}
+
+.filters-panel {
+    top: 5.5rem;
+}
+
+.form-control,
+.form-select,
+.btn {
+    border-radius: 0.8rem;
+}
+
+@media (max-width: 767px) {
+    .panel,
+    .hero-card {
+        border-radius: 1rem;
+        padding: 1rem;
+    }
+
+    .metric-card {
+        min-height: auto;
+    }
+}

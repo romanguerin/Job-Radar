@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Not found - Job Radar{% endblock %}
+
+{% block content %}
+<div class="panel empty-state">
+    <h1 class="h3">Job not found</h1>
+    <p class="text-secondary">This offer may have been removed or has not been collected yet.</p>
+    <a class="btn btn-info" href="/jobs?user_id={{ user.id }}">Back to jobs</a>
+</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+<article class="job-card">
+    <div class="d-flex justify-content-between gap-3 align-items-start">
+        <div>
+            <a class="job-title" href="/jobs/{{ job.id }}?user_id={{ user.id }}">{{ job.title }}</a>
+            <div class="text-secondary small mt-1">{{ job.company or "Unknown company" }} · {{ job.location or "Location not listed" }}</div>
+        </div>
+        <span class="score-pill">{{ score.score }}</span>
+    </div>
+    <p class="job-description">{{ job.description or "No description available." }}</p>
+    <div class="d-flex flex-wrap gap-2">
+        <span class="badge rounded-pill text-bg-secondary">{{ job.source }}</span>
+        {% if job.category %}<span class="badge rounded-pill text-bg-info">{{ job.category }}</span>{% endif %}
+        {% if job.contract_type %}<span class="badge rounded-pill text-bg-dark border">{{ job.contract_type }}</span>{% endif %}
+        {% if job.salary %}<span class="badge rounded-pill text-bg-success">{{ "{:,}".format(job.salary).replace(",", " ") }} €</span>{% endif %}
+    </div>
+</article>

@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Jobs - Job Radar{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-12 col-xl-3">
+        <div class="panel sticky-xl-top filters-panel">
+            <h2 class="h5 mb-3">Filters</h2>
+            <form method="get" action="/jobs" class="vstack gap-3">
+                <input type="hidden" name="user_id" value="{{ user.id }}">
+                <div>
+                    <label class="form-label" for="q">Search</label>
+                    <input class="form-control" id="q" name="q" value="{{ filters.q }}" placeholder="Title, company, text">
+                </div>
+                <div>
+                    <label class="form-label" for="category">Category</label>
+                    <select class="form-select" id="category" name="category">
+                        <option value="">All categories</option>
+                        {% for item in categories %}
+                            <option value="{{ item }}" {% if filters.category == item %}selected{% endif %}>{{ item }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label" for="location">Location</label>
+                    <select class="form-select" id="location" name="location">
+                        <option value="">All locations</option>
+                        {% for item in locations %}
+                            <option value="{{ item }}" {% if filters.location == item %}selected{% endif %}>{{ item }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label" for="source">Source</label>
+                    <select class="form-select" id="source" name="source">
+                        <option value="">All sources</option>
+                        {% for item in sources %}
+                            <option value="{{ item }}" {% if filters.source == item %}selected{% endif %}>{{ item }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label" for="min_score">Minimum score</label>
+                    <input class="form-control" type="number" min="0" max="100" id="min_score" name="min_score" value="{{ filters.min_score }}">
+                </div>
+                <div>
+                    <label class="form-label" for="sort">Sort by</label>
+                    <select class="form-select" id="sort" name="sort">
+                        <option value="score" {% if filters.sort == "score" %}selected{% endif %}>Highest score</option>
+                        <option value="newest" {% if filters.sort == "newest" %}selected{% endif %}>Newest</option>
+                        <option value="salary" {% if filters.sort == "salary" %}selected{% endif %}>Salary</option>
+                    </select>
+                </div>
+                <button class="btn btn-info" type="submit">Apply filters</button>
+                <a class="btn btn-outline-light" href="/jobs?user_id={{ user.id }}">Reset</a>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-12 col-xl-9">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
+            <div>
+                <p class="text-uppercase text-info small fw-semibold mb-1">All jobs</p>
+                <h1 class="h2 mb-0">{{ jobs|length }} offers for {{ user.name }}</h1>
+            </div>
+        </div>
+
+        {% if jobs %}
+            <div class="vstack gap-3">
+                {% for job, score in jobs %}
+                    {% include "partials/job_card.html" %}
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="panel empty-state">No jobs match these filters.</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

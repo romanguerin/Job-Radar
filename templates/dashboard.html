@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Job Radar{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-12">
+        <div class="hero-card p-4 p-lg-5">
+            <div class="d-flex flex-column flex-lg-row justify-content-between gap-3">
+                <div>
+                    <p class="text-uppercase text-info small fw-semibold mb-2">Personal job intelligence</p>
+                    <h1 class="display-6 fw-bold mb-2">Dashboard for {{ user.name }}</h1>
+                    <p class="text-secondary mb-0">Automated collection from France Travail, Indeed, and configured generic sources.</p>
+                </div>
+                <div class="text-lg-end">
+                    <span class="badge rounded-pill text-bg-primary px-3 py-2">Refresh: every 30 minutes</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-xl-3">
+        <div class="metric-card">
+            <span>Total jobs found</span>
+            <strong>{{ total_jobs }}</strong>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="metric-card">
+            <span>Jobs added today</span>
+            <strong>{{ jobs_today }}</strong>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="metric-card">
+            <span>Minimum salary</span>
+            <strong>{{ "{:,}".format(user.minimum_salary).replace(",", " ") }} €</strong>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="metric-card">
+            <span>Keywords</span>
+            <strong>{{ user.keywords or "Not set" }}</strong>
+        </div>
+    </div>
+
+    <div class="col-xl-7">
+        <div class="panel h-100">
+            <div class="panel-header">
+                <h2>Top matching jobs</h2>
+                <a href="/jobs?user_id={{ user.id }}&sort=score" class="btn btn-sm btn-outline-info">View all</a>
+            </div>
+            {% if top_jobs %}
+                <div class="vstack gap-3">
+                    {% for job, score in top_jobs %}
+                        {% include "partials/job_card.html" %}
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">No jobs yet. The scheduler will collect offers automatically.</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="col-xl-5">
+        <div class="panel h-100">
+            <div class="panel-header">
+                <h2>Recent jobs</h2>
+                <a href="/jobs?user_id={{ user.id }}&sort=newest" class="btn btn-sm btn-outline-light">Newest</a>
+            </div>
+            {% if recent_jobs %}
+                <div class="list-group list-group-flush recent-list">
+                    {% for job, score in recent_jobs %}
+                        <a class="list-group-item list-group-item-action" href="/jobs/{{ job.id }}?user_id={{ user.id }}">
+                            <div class="d-flex justify-content-between gap-3">
+                                <div>
+                                    <div class="fw-semibold">{{ job.title }}</div>
+                                    <small class="text-secondary">{{ job.company }} · {{ job.location }}</small>
+                                </div>
+                                <span class="score-pill">{{ score.score }}</span>
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">No recent jobs found.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
